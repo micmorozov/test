@@ -14,11 +14,11 @@
         return result;
     }
     
-  //  app.pauseTimer();
+    app.pauseTimer();
 
     var videoid = findGetParam('videoid');
-    var autoplay = parseInt(findGetParam('autoplay'));
-    console.log(autoplay);
+    var autoplay = findGetParam('autoplay')||0;
+    
     // 2. This code loads the IFrame Player API code asynchronously.
     var tag = document.createElement('script');
 
