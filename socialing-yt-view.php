@@ -1,0 +1,101 @@
+<?php
+$videoid = $_GET['videoid']??'';
+$autoplay = (bool)($_GET['autoplay']??0);
+if(!$videoid){
+    die('Не указан видеоролик');
+}
+?>
+<div style="font-size: 36px; color: red">Включите звук, запустите видео и просмотрите его указанное время, после этого подтвердите выполнение.</div>
+<div id="player"></div>
+<script>
+    app.pauseTimer();
+
+    var autoplay = <?=(int)$autoplay;?>
+    // 2. This code loads the IFrame Player API code asynchronously.
+    var tag = document.createElement('script');
+
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    // 3. This function creates an <iframe> (and YouTube player)
+    //    after the API code downloads.
+    var player;
+    var checkInterval;
+    function onYouTubeIframeAPIReady() {
+        new YT.Player('player', {
+            height: '90%',
+            width: '90%',
+            videoId: '<?=$videoid?>',
+            playerVars: {
+                'autoplay': autoplay
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+
+    }
+
+    // 4. The API will call this function when the video player is ready.
+    function onPlayerReady(event) {
+        player = event.target;
+
+        //if(autoplay) playVideo();
+
+        checkInterval = setInterval(checkStateVideo, 500);
+    }
+
+    function checkStateVideo(){
+        if(isMuted())
+            pauseVideo();
+    }
+
+    // 5. The API calls this function when the player's state changes.
+    //    The function indicates that when playing a video (state=1),
+    //    the player should play for six seconds and then stop.
+    function onPlayerStateChange(event) {
+        if (event.data != YT.PlayerState.PLAYING) {
+            app.pauseTimer();
+        }else{
+            app.startTimer();
+        }
+    }
+
+    /**
+     * Выключен ли звук
+     * @returns {*|boolean}
+     */
+    function isMuted()
+    {
+        return player.isMuted() || player.getVolume() < 20;
+    }
+
+    // Ставим плеер на паузу
+    function pauseVideo()
+    {
+        player.pauseVideo();
+        app.pauseTimer();
+    }
+
+    /**
+     * Запускаем видео
+     */
+    function playVideo()
+    {
+        player.playVideo();
+    }
+
+    window.onblur = function(){
+        console.log('onblur');
+        pauseVideo();
+    }
+
+    document.addEventListener("visibilitychange", function() {
+        console.log(document.visibilityState);
+        console.log(document.hidden);
+    });
+</script>
+</body>
+</html>
